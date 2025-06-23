@@ -1,21 +1,23 @@
 import os
 import time
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils import logger, format_markdown
-from cisa import fetch_cisa_vulns
-from oscs import fetch_oscs_vulns
-from qianxin import fetch_qianxin_vulns
-from threatbook import fetch_threatbook_vulns
+from cisa import fetch_cisa
+from oscs import fetch_oscs
+from qianxin import fetch_qianxin
+from threatbook import fetch_threatbook
 
 class VulnScraper:
     def __init__(self):
         self.output_dir = os.getenv('OUTPUT_DIR', 'vulnerability_reports')
+        # 计算两天前的日期作为查询起始日期
+        self.start_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
         self.vuln_sources = {
-            'CISA': fetch_cisa_vulns,
-            'OSCS': fetch_oscs_vulns,
-            'Qianxin': fetch_qianxin_vulns,
-            'ThreatBook': fetch_threatbook_vulns
+            "CISA": fetch_cisa,
+            "OSCS": fetch_oscs,
+            "Qianxin": fetch_qianxin,
+            "ThreatBook": fetch_threatbook
         }
         # 创建输出目录
         os.makedirs(self.output_dir, exist_ok=True)
@@ -28,7 +30,7 @@ class VulnScraper:
         for source_name, fetcher in self.vuln_sources.items():
             try:
                 logger.info(f"开始从 {source_name} 获取漏洞信息")
-                vulns = fetcher()
+                vulns = fetcher(self.start_date)
                 if vulns:
                     all_vulns[source_name] = vulns
                     logger.info(f"成功获取 {source_name} 漏洞信息 {len(vulns)} 条")
@@ -41,9 +43,10 @@ class VulnScraper:
         return all_vulns
 
     def generate_markdown_report(self, vulns, report_date=None):
-        """生成Markdown格式的漏洞报告"""
         if not report_date:
-            report_date = datetime.now().strftime('%Y-%m-%d')
+            report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+        """生成Markdown格式的漏洞报告"""
 
         md_content = f"# 漏洞情报报告 - {report_date}\n\n"
         md_content += f"**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
@@ -62,7 +65,7 @@ class VulnScraper:
                 continue
 
             # 按严重程度排序（假设漏洞信息中有'severity'字段）
-            sorted_vulns = sorted(vuln_list, key=lambda x: x.get('severity', 'medium'), reverse=True)
+            sorted_vulns = sorted(vuln_list, key=lambda x: getattr(x, 'severity', 'medium') or 'medium', reverse=True)
 
             for idx, vuln in enumerate(sorted_vulns, 1):
                 md_content += format_markdown(vuln, idx)
@@ -71,9 +74,11 @@ class VulnScraper:
         return md_content
 
     def save_report(self, content, report_date=None):
+        if not report_date:
+            report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         """保存Markdown报告到文件"""
         if not report_date:
-            report_date = datetime.now().strftime('%Y-%m-%d')
+            report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         filename = f"vulnerability_report_{report_date}.md"
         file_path = os.path.join(self.output_dir, filename)
 
@@ -92,8 +97,9 @@ class VulnScraper:
             return None
 
         logger.info("开始生成Markdown报告")
-        report_content = self.generate_markdown_report(vulns)
-        report_path = self.save_report(report_content)
+        report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        report_content = self.generate_markdown_report(vulns, report_date=report_date)
+        report_path = self.save_report(report_content, report_date=report_date)
 
         logger.info("===== 漏洞信息爬取流程完成 ====")
         return report_path

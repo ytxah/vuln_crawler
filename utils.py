@@ -93,8 +93,8 @@ def format_markdown(vuln: VulnItem, index: int) -> str:
     md.append(f"- **严重程度**: {vuln.severity}")
     md.append(f"- **来源**: {vuln.source}")
     md.append(f"\n#### 漏洞描述\n{vuln.description}")
-    if vuln.references:
+    if vuln.reference:
         md.append("\n#### 参考链接")
-        for ref in vuln.references:
+        for ref in vuln.reference:
             md.append(f"- [{ref}]({ref})")
     return '\n'.join(md)
