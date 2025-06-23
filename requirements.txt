@@ -1,0 +1,7 @@
+PyQt6>=6.6
+requests>=2.31.0
+python-dotenv>=1.0.0
+tenacity>=8.2.2
+pytest>=7.4.0
+requests>=2.32
+schedule>=1.2
