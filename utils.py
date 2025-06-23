@@ -1,10 +1,19 @@
-"""
-公共工具：HTTP session、日期、去重合并
-"""
+import logging
 import datetime as _dt
 from typing import Dict, List, Callable, Optional
 import requests
 from models import VulnItem
+
+# Configure logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('vuln_crawler.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # ---------------- HTTP 会话 ----------------
 _session = requests.Session()
@@ -22,9 +31,9 @@ def fetch_all(target_date: str, fetchers: List[Fetcher]) -> List[VulnItem]:
     for fn in fetchers:
         try:
             items = fn(target_date)
-            print(f"[{fn.__name__}] {len(items)} item(s)")
+            logger.info(f"[{fn.__name__}] {len(items)} item(s)")
         except Exception as e:
-            print(f"[{fn.__name__}] ERROR → {e}")
+            logger.error(f"[{fn.__name__}] ERROR → {e}")
             continue
 
         for it in items:
@@ -73,3 +82,19 @@ def set_proxy(http_url: Optional[str] = None,
 # ---------------- 小工具 ----------------
 def today() -> str:
     return _dt.date.today().isoformat()
+
+# ---------------- Markdown 格式化 ----------------
+def format_markdown(vuln: VulnItem, index: int) -> str:
+    """将漏洞信息格式化为Markdown字符串"""
+    md = [f"### {index}. {vuln.name}"]
+    if vuln.cve:
+        md.append(f"- **CVE ID**: [{vuln.cve}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln.cve})")
+    md.append(f"- **发布日期**: {vuln.date}")
+    md.append(f"- **严重程度**: {vuln.severity}")
+    md.append(f"- **来源**: {vuln.source}")
+    md.append(f"\n#### 漏洞描述\n{vuln.description}")
+    if vuln.references:
+        md.append("\n#### 参考链接")
+        for ref in vuln.references:
+            md.append(f"- [{ref}]({ref})")
+    return '\n'.join(md)

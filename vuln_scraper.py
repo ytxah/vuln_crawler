@@ -9,9 +9,8 @@ from qianxin import fetch_qianxin_vulns
 from threatbook import fetch_threatbook_vulns
 
 class VulnScraper:
-    def __init__(self, config_path='vuln_crawler_config.json'):
-        self.config = self.load_config(config_path)
-        self.output_dir = self.config.get('output_dir', 'vulnerability_reports')
+    def __init__(self):
+        self.output_dir = os.getenv('OUTPUT_DIR', 'vulnerability_reports')
         self.vuln_sources = {
             'CISA': fetch_cisa_vulns,
             'OSCS': fetch_oscs_vulns,
@@ -21,17 +20,7 @@ class VulnScraper:
         # 创建输出目录
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def load_config(self, config_path):
-        """加载配置文件"""
-        try:
-            with open(config_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except FileNotFoundError:
-            logger.warning(f"配置文件 {config_path} 未找到，使用默认配置")
-            return {}
-        except json.JSONDecodeError:
-            logger.error(f"配置文件 {config_path} 格式错误")
-            return {}
+
 
     def fetch_all_vulns(self):
         """从所有数据源获取漏洞信息"""
