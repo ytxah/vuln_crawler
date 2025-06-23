@@ -92,9 +92,9 @@ def format_markdown(vuln: VulnItem, index: int) -> str:
     md.append(f"- **发布日期**: {vuln.date}")
     md.append(f"- **严重程度**: {vuln.severity}")
     md.append(f"- **来源**: {vuln.source}")
-    md.append(f"\n#### 漏洞描述\n{vuln.description}")
+    md.append(f"- **漏洞描述**\n{vuln.description}")
     if vuln.reference:
-        md.append("\n#### 参考链接")
+        md.append("- **参考链接")
         # 确保reference始终是列表
         references = vuln.reference if isinstance(vuln.reference, list) else [vuln.reference]
         for ref in references:

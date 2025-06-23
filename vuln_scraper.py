@@ -97,14 +97,49 @@ class VulnScraper:
             md_content += f"- [{source_name}](#{source_name.lower()})\n"
         md_content += "\n---\n"
 
-        # 添加各来源漏洞详情
+        # 生成漏洞汇总表格
+        md_content += "## 漏洞汇总表格\n\n"
+        md_content += "| ID | CVE ID | 漏洞名称 | 严重程度 | 发布日期 | 来源 | 参考链接 |\n"
+        md_content += "|-----|--------|----------|----------|----------|------|----------|\n"
+
+        all_vulns_list = []
         for source_name, vuln_list in vulns.items():
-            md_content += f"## {source_name}\n\n"
+            all_vulns_list.extend(vuln_list)
+
+        # 按严重程度和日期排序
+        sorted_all_vulns = sorted(all_vulns_list, key=lambda x: (getattr(x, 'severity', 'medium') or 'medium', x.date), reverse=True)
+
+        for idx, vuln in enumerate(sorted_all_vulns, 1):
+            cve_id = vuln.cve or "-"
+            # 处理参考链接
+            references = []
+            if vuln.reference:
+                if isinstance(vuln.reference, list):
+                    references = vuln.reference
+                else:
+                    references = [vuln.reference]
+            ref_links = []
+            for ref in references[:3]:  # 最多显示3个链接
+                if isinstance(ref, str) and ref.startswith(('http://', 'https://')):
+                    ref_links.append(f"[{ref[:50]}...]({ref})")
+                else:
+                    ref_links.append(str(ref)[:50] + "...") if len(str(ref)) > 50 else str(ref)
+            ref_str = '<br>'.join(ref_links) if ref_links else "-"
+
+            # 截断过长的漏洞名称
+            name = vuln.name[:60] + "..." if len(vuln.name) > 60 else vuln.name
+
+            md_content += f"| {idx} | {cve_id} | {name} | {vuln.severity or '未知'} | {vuln.date} | {vuln.source} | {ref_str} |\n"
+
+        md_content += "\n\n**注：** 表格中参考链接仅显示前3个，完整信息请查看各数据源详情部分\n\n---\n\n"
+
+        # 保留各来源详细信息部分
+        for source_name, vuln_list in vulns.items():
+            md_content += f"## {source_name} 详细信息\n\n"
             if not vuln_list:
                 md_content += "暂无漏洞信息\n\n"
                 continue
 
-            # 按严重程度排序（假设漏洞信息中有'severity'字段）
             sorted_vulns = sorted(vuln_list, key=lambda x: getattr(x, 'severity', 'medium') or 'medium', reverse=True)
 
             for idx, vuln in enumerate(sorted_vulns, 1):
