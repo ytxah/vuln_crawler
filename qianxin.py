@@ -112,7 +112,7 @@ def search_qianxin(keyword: str) -> List[VulnItem]:
                     tags=row.get("vuln_type") or row.get("threat_category"),
                     source="奇安信 CERT",
                     description=row.get("description"),
-                    reference=None,
+                    reference=row.get("reference", "").split(',') if row.get("reference") else None,
                 )
             )
 

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 @dataclass
 class VulnItem:
@@ -10,7 +10,7 @@ class VulnItem:
     tags: Optional[str]
     source: str
     description: Optional[str]
-    reference: Optional[str]
+    reference: Optional[List[str]]
 
     def display_block(self) -> str:
         return (

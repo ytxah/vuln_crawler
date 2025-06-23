@@ -57,7 +57,7 @@ def search_changtin(keyword: str) -> List[VulnItem]:
                     tags=row.get("weakness"),
                     source="长亭 Rivers",
                     description=row.get("summary"),
-                    reference=row.get("references") or "",
+                    reference=row.get("references", "").split(',') if row.get("references") else None,
                 )
             )
 
@@ -89,7 +89,7 @@ def fetch_changtin(date: str) -> List[VulnItem]:
                     tags=row.get("weakness"),
                     source="长亭 Rivers",
                     description=row.get("summary"),
-                    reference=row.get("references") or "",
+                    reference=row.get("references", "").split(',') if row.get("references") else None,
                 )
             )
         last_date = data["list"][-1]["disclosure_date"].split(" ")[0]

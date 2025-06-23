@@ -78,7 +78,7 @@ def search_oscs(keyword: str) -> List[VulnItem]:
                     tags=None,
                     source="OSCS",
                     description=row.get("desc") or row.get("description"),
-                    reference=row.get("url"),
+                    reference=[row.get("url")] if row.get("url") else None,
                 )
             )
 
@@ -117,7 +117,7 @@ def fetch_oscs(date: str) -> List[VulnItem]:
                     tags=None,
                     source="OSCS",
                     description=row.get("desc") or row.get("description"),
-                    reference=row.get("url"),
+                    reference=[row.get("url")] if row.get("url") else None,
                 )
             )
 

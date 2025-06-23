@@ -45,7 +45,7 @@ def fetch_cisa(date: str) -> List[VulnItem]:
                 tags=_get(r, "vendorProject", "vendor_project"),
                 source="CISA KEV",
                 description=_get(r, "shortDescription", "short_description"),
-                reference=r.get("notes"),
+                reference=r.get("notes", "").split('\n') if r.get("notes") else None,
             )
         )
     return vulns
@@ -88,7 +88,7 @@ def search_cisa(keyword: str) -> List[VulnItem]:
                 tags=_get(r, "vendorProject", "vendor_project"),
                 source="CISA KEV",
                 description=_get(r, "shortDescription", "short_description"),
-                reference=r.get("notes"),
+                reference=r.get("notes", "").split('\n') if r.get("notes") else None,
             )
         )
 

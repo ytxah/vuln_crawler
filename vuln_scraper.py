@@ -9,10 +9,21 @@ from qianxin import fetch_qianxin
 from threatbook import fetch_threatbook
 
 class VulnScraper:
-    def __init__(self):
+    def __init__(self, days_back=None):
         self.output_dir = os.getenv('OUTPUT_DIR', 'vulnerability_reports')
-        # 计算两天前的日期作为查询起始日期
-        self.start_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+        
+        # 允许通过环境变量或参数设置回溯天数，默认7天
+        try:
+            self.days_back = int(os.getenv('DAYS_BACK', days_back or 7))
+            if self.days_back < 1:
+                raise ValueError("回溯天数必须为正整数")
+        except ValueError as e:
+            logger.warning(f"无效的回溯天数设置: {e}, 使用默认值7天")
+            self.days_back = 20
+        
+        self.start_date = (datetime.now() - timedelta(days=self.days_back)).strftime("%Y-%m-%d")
+        self.end_date = datetime.now().strftime("%Y-%m-%d")
+        
         self.vuln_sources = {
             "CISA": fetch_cisa,
             "OSCS": fetch_oscs,
@@ -21,25 +32,54 @@ class VulnScraper:
         }
         # 创建输出目录
         os.makedirs(self.output_dir, exist_ok=True)
+        
+        logger.info(f"漏洞信息爬取配置: 日期范围从 {self.start_date} 到 {self.end_date} (共{self.days_back}天)")
 
 
 
     def fetch_all_vulns(self):
-        """从所有数据源获取漏洞信息"""
+        """从所有数据源获取指定日期范围内的漏洞信息"""
         all_vulns = {}
-        for source_name, fetcher in self.vuln_sources.items():
-            try:
-                logger.info(f"开始从 {source_name} 获取漏洞信息")
-                vulns = fetcher(self.start_date)
-                if vulns:
-                    all_vulns[source_name] = vulns
-                    logger.info(f"成功获取 {source_name} 漏洞信息 {len(vulns)} 条")
-                else:
-                    logger.warning(f"未获取到 {source_name} 漏洞信息")
-            except Exception as e:
-                logger.error(f"获取 {source_name} 漏洞信息失败: {str(e)}")
-            # 添加延迟避免请求过于频繁
-            time.sleep(2)
+        current_date = datetime.strptime(self.start_date, "%Y-%m-%d").date()
+        end_date = datetime.now().date()
+        
+        # 遍历日期范围内的每一天
+        while current_date <= end_date:
+            target_date = current_date.strftime("%Y-%m-%d")
+            logger.info(f"开始处理日期: {target_date}")
+            
+            for source_name, fetcher in self.vuln_sources.items():
+                try:
+                    logger.info(f"从 {source_name} 获取 {target_date} 的漏洞信息")
+                    vulns = fetcher(target_date)
+                    
+                    if vulns:
+                        if source_name not in all_vulns:
+                            all_vulns[source_name] = []
+                        all_vulns[source_name].extend(vulns)
+                        logger.info(f"成功获取 {source_name} {target_date} 漏洞信息 {len(vulns)} 条")
+                    else:
+                        logger.warning(f"未获取到 {source_name} {target_date} 的漏洞信息")
+                except Exception as e:
+                    logger.error(f"获取 {source_name} {target_date} 漏洞信息失败: {str(e)}")
+                
+                # 添加延迟避免请求过于频繁
+                time.sleep(2)
+            
+            current_date += timedelta(days=1)
+        
+        # 去重处理
+        for source_name in all_vulns:
+            seen = {}
+            unique_vulns = []
+            for vuln in all_vulns[source_name]:
+                key = vuln.cve or f"{vuln.name}_{vuln.date}"
+                if key not in seen:
+                    seen[key] = True
+                    unique_vulns.append(vuln)
+            all_vulns[source_name] = unique_vulns
+            logger.info(f"{source_name} 去重后漏洞数量: {len(unique_vulns)}")
+        
         return all_vulns
 
     def generate_markdown_report(self, vulns, report_date=None):
