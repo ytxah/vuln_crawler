@@ -35,8 +35,8 @@ jobs:
       - name: 获取最新文件
         id: files
         run: |
-          JSON_FILE=$(ls result/0day_*.json | sort -r | head -n 1)
-          MD_FILE=$(ls result/0day_*.md | sort -r | head -n 1)
+          JSON_FILE=$(ls vulnerability_reports/vulnerability_report_*.json | sort -r | head -n 1)
+          MD_FILE=$(ls vulnerability_reports/vulnerability_report_*.md | sort -r | head -n 1)
           echo "json_file=${JSON_FILE}" >> $GITHUB_OUTPUT
           echo "md_file=${MD_FILE}" >> $GITHUB_OUTPUT
 
@@ -45,7 +45,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           # git add -f result/0day_*.json result/0day_*.md
-          git add -f  result/0day_*.md  #仅更新md文件
+          git add -f  vulnerability_reports/vulnerability_report_*.md  #仅更新md文件
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "自动更新0day: $(date +'%Y-%m-%d %H:%M')"
             git push
