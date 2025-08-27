@@ -62,6 +62,6 @@ jobs:
           password: ${{ secrets.MAILPASSWORD }}
           subject: 漏洞情报报告
           body: $GITHUB_OUTPUT
-          to: ${{ secrets.emaillist}}
+          to: ${{ secrets.EMAILLIST}}
           from: GitHub Actions
           content_type: text/html
