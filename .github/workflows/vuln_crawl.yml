@@ -9,6 +9,8 @@ jobs:
   crawl-and-update:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
+    permissions: #新增：赋予推送代码的权限
+      contents: write
 
     steps:
       - name: 检出仓库
@@ -39,6 +41,10 @@ jobs:
           MD_FILE=$(ls vulnerability_reports/vulnerability_report_*.md | sort -r | head -n 1)
           echo "json_file=${JSON_FILE}" >> $GITHUB_OUTPUT
           echo "md_file=${MD_FILE}" >> $GITHUB_OUTPUT
+
+      - name: 拉取远程更新
+      run: |
+        git pull origin main --rebase
 
       - name: 自动提交更新
         run: |
