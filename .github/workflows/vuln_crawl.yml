@@ -52,3 +52,16 @@ jobs:
           else
             echo "无变更可提交"
           fi
+
+      - name: 邮件发送报告
+        uses: dawidd6/action-send-mail@master
+        with:
+          serveraddress: smtp.163.com
+          serverport: 465
+          username: ${{ secrets.MAILUSERNAME }}
+          password: ${{ secrets.MAILPASSWORD }}
+          subject: 漏洞情报报告
+          body: $GITHUB_OUTPUT
+          to: ${{ secrets.emaillist}}
+          from: GitHub Actions
+          content_type: text/html
