@@ -43,8 +43,8 @@ jobs:
           echo "md_file=${MD_FILE}" >> $GITHUB_OUTPUT
 
       - name: 拉取远程更新
-      run: |
-        git pull origin main --rebase
+        run: |
+          git pull origin main --rebase
 
       - name: 自动提交更新
         run: |
