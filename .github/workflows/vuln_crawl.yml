@@ -62,10 +62,11 @@ jobs:
       - name: 邮件发送报告
         uses: dawidd6/action-send-mail@master
         with:
-          server_address: smtp.163.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
+          connection_url: ${{secrets.MAIL_CONNECTION}}
+          #server_address: smtp.163.com
+          #server_port: 465
+          #username: ${{ secrets.MAIL_USERNAME }}
+          #password: ${{ secrets.MAIL_PASSWORD }}
           subject: 漏洞情报报告
           body: ${{ steps.read_mail_content.outputs.content }}
           to: 675372848@qq.com
