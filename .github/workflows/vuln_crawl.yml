@@ -67,7 +67,7 @@ jobs:
           username: ${{ secrets.MAILUSERNAME }}
           password: ${{ secrets.MAILPASSWORD }}
           subject: 漏洞情报报告
-          body: $GITHUB_OUTPUT
+          body: ${{ steps.read_mail_content.outputs.content }}
           to: 675372848@qq.com
           from: GitHub Actions
-          content_type: text/html
+          convert_markdown: true
