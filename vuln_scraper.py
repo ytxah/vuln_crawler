@@ -84,12 +84,12 @@ class VulnScraper:
 
     def generate_markdown_report(self, vulns, report_date=None):
         if not report_date:
-            report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            report_date = datetime.now().strftime('%Y-%m-%d')
 
         """生成Markdown格式的漏洞报告"""
 
         md_content = f"# 漏洞情报报告 - {report_date}\n\n"
-        md_content += f"**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        md_content += f"**生成时间**: {datetime.now().strftime('%Y-%m-%d')}\n\n"
         md_content += "## 目录\n"
 
         # 添加目录
@@ -150,10 +150,10 @@ class VulnScraper:
 
     def save_report(self, content, report_date=None):
         if not report_date:
-            report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            report_date = datetime.now().strftime('%Y-%m-%d')
         """保存Markdown报告到文件"""
         if not report_date:
-            report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            report_date = datetime.now().strftime('%Y-%m-%d')
         filename = f"vulnerability_report_{report_date}.md"
         file_path = os.path.join(self.output_dir, filename)
 
@@ -172,7 +172,7 @@ class VulnScraper:
             return None
 
         logger.info("开始生成Markdown报告")
-        report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        report_date = datetime.now().strftime('%Y-%m-%d')
         report_content = self.generate_markdown_report(vulns, report_date=report_date)
         report_path = self.save_report(report_content, report_date=report_date)
 
