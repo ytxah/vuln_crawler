@@ -53,7 +53,7 @@ jobs:
           # git add -f result/0day_*.json result/0day_*.md
           git add -f  vulnerability_reports/vulnerability_report_*.md  #仅更新md文件
           if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "自动更新0day: $(date +'%Y-%m-%d %H:%M')"
+            git commit -m "自动更新0day: $(date +'%Y-%m-%d')"
             git push
           else
             echo "无变更可提交"
