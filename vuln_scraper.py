@@ -14,11 +14,11 @@ class VulnScraper:
         
         # 允许通过环境变量或参数设置回溯天数，默认3天
         try:
-            self.days_back = int(os.getenv('DAYS_BACK', days_back or 3))
+            self.days_back = int(os.getenv('DAYS_BACK', days_back or 1))
             if self.days_back < 1:
                 raise ValueError("回溯天数必须为正整数")
         except ValueError as e:
-            logger.warning(f"无效的回溯天数设置: {e}, 使用默认值3天")
+            logger.warning(f"无效的回溯天数设置: {e}, 使用默认值1天")
             self.days_back = 20
         
         self.start_date = (datetime.now() - timedelta(days=self.days_back)).strftime("%Y-%m-%d")
